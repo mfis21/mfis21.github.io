@@ -1,171 +1,135 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Chess Game</title>
+    <meta charset="UTF-8">
+    <title>Flappy Bird</title>
     <style>
-        /* Chessboard Styles */
-        .chessboard {
-            display: grid;
-            grid-template-columns: repeat(8, 1fr);
-            grid-template-rows: repeat(8, 1fr);
-            width: 400px;
-            height: 400px;
-            border: 1px solid #000;
-        }
-
-        .chessboard .cell {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 24px;
-        }
-
-        .chessboard .cell:nth-child(even) {
-            background-color: #f2f2f2;
-        }
-
-        .selected {
-            background-color: yellow;
+        canvas {
+            border: 1px solid black;
         }
     </style>
 </head>
 <body>
-    <div class="chessboard">
-        <!-- Chessboard Cells -->
-        <div class="cell" onclick="selectCell(this, 0, 0)">♜</div>
-        <div class="cell" onclick="selectCell(this, 0, 1)">♞</div>
-        <div class="cell" onclick="selectCell(this, 0, 2)">♝</div>
-        <div class="cell" onclick="selectCell(this, 0, 3)">♛</div>
-        <div class="cell" onclick="selectCell(this, 0, 4)">♚</div>
-        <div class="cell" onclick="selectCell(this, 0, 5)">♝</div>
-        <div class="cell" onclick="selectCell(this, 0, 6)">♞</div>
-        <div class="cell" onclick="selectCell(this, 0, 7)">♜</div>
-
-        <!-- Remaining cells omitted for brevity -->
-
-    </div>
+    <canvas id="gameCanvas" width="400" height="400"></canvas>
 
     <script>
-        let selectedCell = null;
-        let isWhiteTurn = true;
-        const chessboard = document.querySelector('.chessboard');
+        const canvas = document.getElementById("gameCanvas");
+        const context = canvas.getContext("2d");
 
-        function selectCell(cell, row, col) {
-            if (selectedCell) {
-                // Move the selected piece to the clicked cell
-                const isValidMove = movePiece(selectedCell, cell);
-                if (isValidMove) {
-                    cell.innerHTML = selectedCell.innerHTML;
-                    selectedCell.innerHTML = '';
-                    selectedCell.classList.remove('selected');
-                    selectedCell = null;
-                    isWhiteTurn = !isWhiteTurn;
-                } else {
-                    alert('Invalid move!');
+        // Bird
+        let birdX = 50;
+        let birdY = canvas.height / 2;
+        let birdRadius = 20;
+        let birdGravity = 1.5;
+        let birdVelocity = 0;
+
+        function drawBird() {
+            context.beginPath();
+            context.arc(birdX, birdY, birdRadius, 0, Math.PI * 2);
+            context.fillStyle = "yellow";
+            context.fill();
+            context.closePath();
+        }
+
+        function updateBird() {
+            birdVelocity += birdGravity;
+            birdY += birdVelocity;
+        }
+
+        // Pipes
+        let pipes = [];
+        let pipeWidth = 50;
+        let pipeHeight = 200;
+        let pipeGap = 150;
+        let pipeSpeed = 2;
+        let pipeSpawnInterval = 2000;
+        let lastPipeSpawnTime = 0;
+
+        function createPipe() {
+            let pipeX = canvas.width;
+            let pipeY = Math.floor(Math.random() * (canvas.height - pipeHeight));
+            pipes.push({ x: pipeX, y: pipeY });
+        }
+
+        function drawPipes() {
+            for (let i = 0; i < pipes.length; i++) {
+                let pipe = pipes[i];
+                context.fillStyle = "green";
+                context.fillRect(pipe.x, 0, pipeWidth, pipe.y);
+                context.fillRect(pipe.x, pipe.y + pipeHeight + pipeGap, pipeWidth, canvas.height - pipe.y - pipeHeight - pipeGap);
+            }
+        }
+
+        function updatePipes() {
+            for (let i = 0; i < pipes.length; i++) {
+                let pipe = pipes[i];
+                pipe.x -= pipeSpeed;
+
+                if (pipe.x + pipeWidth < 0) {
+                    pipes.splice(i, 1);
+                    i--;
                 }
-            } else {
-                // Select the clicked cell
-                if (cell.innerHTML !== '') {
-                    if ((cell.innerHTML.includes('♜') && isWhiteTurn) || (cell.innerHTML.includes('♚') && !isWhiteTurn)) {
-                        cell.classList.add('selected');
-                        selectedCell = cell;
-                    } else {
-                        alert("It's not your turn!");
-                    }
+            }
+
+            let currentTime = Date.now();
+            if (currentTime - lastPipeSpawnTime >= pipeSpawnInterval) {
+                createPipe();
+                lastPipeSpawnTime = currentTime;
+            }
+        }
+
+        // Game loop
+        function draw() {
+            context.clearRect(0, 0, canvas.width, canvas.height);
+            drawBird();
+            drawPipes();
+        }
+
+        function update() {
+            updateBird();
+            updatePipes();
+
+            if (birdY + birdRadius > canvas.height || birdY - birdRadius < 0) {
+                // Game over
+                alert("Game over!");
+                resetGame();
+            }
+
+            for (let i = 0; i < pipes.length; i++) {
+                let pipe = pipes[i];
+
+                if (
+                    birdX + birdRadius > pipe.x && birdX - birdRadius < pipe.x + pipeWidth &&
+                    (birdY - birdRadius < pipe.y + pipeHeight || birdY + birdRadius > pipe.y + pipeHeight + pipeGap)
+                ) {
+                    // Game over
+                    alert("Game over!");
+                    resetGame();
                 }
             }
         }
 
-        function movePiece(sourceCell, targetCell) {
-            const piece = sourceCell.innerHTML;
-            const sourceRow = parseInt(sourceCell.style.gridRow) - 1;
-            const sourceCol = parseInt(sourceCell.style.gridColumn) - 1;
-            const targetRow = parseInt(targetCell.style.gridRow) - 1;
-            const targetCol = parseInt(targetCell.style.gridColumn) - 1;
-
-            // Check if the move is valid for the selected piece
-            if (isValidMove(piece, sourceRow, sourceCol, targetRow, targetCol)) {
-                // Check if there is a piece at the target cell (capturing)
-                if (targetCell.innerHTML !== '') {
-                    // Checkmate condition
-                    if (targetCell.innerHTML.includes('♚')) {
-                        alert('Checkmate! Game Over.');
-                        chessboard.removeEventListener('click', handleCellClick);
-                        return true;
-                    }
-                }
-
-                return true;
-            }
-
-            return false;
+        function resetGame() {
+            birdY = canvas.height / 2;
+            birdVelocity = 0;
+            pipes = [];
         }
 
-        function isValidMove(piece, sourceRow, sourceCol, targetRow, targetCol) {
-            const rowDiff = Math.abs(targetRow - sourceRow);
-            const colDiff = Math.abs(targetCol - sourceCol);
-
-            switch (piece) {
-                case '♟': // Pawn
-                    // Pawn can move one step forward or two steps forward from its starting position
-                    // It can capture diagonally forward by one step
-                    if (sourceCol === targetCol) {
-                        // Moving forward
-                        if (sourceRow === 1 && targetRow === 3) {
-                            // Two steps forward from starting position
-                            return true;
-                        } else if (targetRow - sourceRow === 1) {
-                            // One step forward
-                            return true;
-                        }
-                    } else if (colDiff === 1 && targetRow - sourceRow === 1) {
-                        // Capturing diagonally
-                        return true;
-                    }
-                    break;
-
-                case '♜': // Rook
-                    // Rook can move horizontally or vertically any number of steps
-                    if (sourceRow === targetRow || sourceCol === targetCol) {
-                        return true;
-                    }
-                    break;
-
-                case '♝': // Bishop
-                    // Bishop can move diagonally any number of steps
-                    if (rowDiff === colDiff) {
-                        return true;
-                    }
-                    break;
-
-                case '♞': // Knight
-                    // Knight moves in an L-shape pattern
-                    if ((rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)) {
-                        return true;
-                    }
-                    break;
-
-                case '♛': // Queen
-                    // Queen can move horizontally, vertically, or diagonally any number of steps
-                    if (sourceRow === targetRow || sourceCol === targetCol || rowDiff === colDiff) {
-                        return true;
-                    }
-                    break;
-
-                case '♚': // King
-                    // King can move one step in any direction
-                    if (rowDiff <= 1 && colDiff <= 1) {
-                        return true;
-                    }
-                    break;
-
-                default:
-                    return false;
+        function keyDownHandler(event) {
+            if (event.keyCode === 32) {
+                birdVelocity = -15;
             }
-
-            return false;
         }
+
+        document.addEventListener("keydown", keyDownHandler);
+
+        function gameLoop() {
+            draw();
+            update();
+            requestAnimationFrame(gameLoop);
+        }
+
+        gameLoop();
     </script>
 </body>
 </html>
