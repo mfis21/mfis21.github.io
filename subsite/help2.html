@@ -23,6 +23,19 @@
     .restart-button {
       display: none;
       margin-top: 10px;
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .restart-button:hover {
+      background-color: #45a049;
     }
   </style>
 </head>
@@ -57,6 +70,7 @@
       if (!gameOver && board[row][col] === '') {
         board[row][col] = currentPlayer;
         document.querySelector('.board').children[row * 3 + col].innerText = currentPlayer;
+        document.querySelector('.board').children[row * 3 + col].style.color = currentPlayer === 'X' ? '#ff3333' : '#0088cc';
 
         if (checkWin(currentPlayer)) {
           showRestartButton();
@@ -126,6 +140,7 @@
       var cells = document.querySelector('.board').children;
       for (var i = 0; i < cells.length; i++) {
         cells[i].innerText = '';
+        cells[i].style.color = '';
       }
 
       document.querySelector('.restart-button').style.display = 'none';
