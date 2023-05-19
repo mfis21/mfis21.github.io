@@ -1,135 +1,73 @@
+
+Conversation opened. 1 unread message.
+
+Skip to content
+Using Redlands Unified School District Mail with screen readers
+1 of 199
+(no subject)
+Inbox
+
+Andrew Sam
+9:55 AM (0 minutes ago)
+to me
+
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Flappy Bird</title>
+    <meta charset="utf-8">
+    <title>Aim Trainer</title>
     <style>
-        canvas {
-            border: 1px solid black;
+        #target {
+            width: 50px;
+            height: 50px;
+            background-color: red;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <canvas id="gameCanvas" width="400" height="400"></canvas>
+    <div id="target"></div>
 
     <script>
-        const canvas = document.getElementById("gameCanvas");
-        const context = canvas.getContext("2d");
+        var target = document.getElementById("target");
+        var score = 0;
 
-        // Bird
-        let birdX = 50;
-        let birdY = canvas.height / 2;
-        let birdRadius = 20;
-        let birdGravity = 1.5;
-        let birdVelocity = 0;
-
-        function drawBird() {
-            context.beginPath();
-            context.arc(birdX, birdY, birdRadius, 0, Math.PI * 2);
-            context.fillStyle = "yellow";
-            context.fill();
-            context.closePath();
+        function getRandomPosition() {
+            var maxWidth = window.innerWidth - target.offsetWidth;
+            var maxHeight = window.innerHeight - target.offsetHeight;
+            var randomX = Math.floor(Math.random() * maxWidth);
+            var randomY = Math.floor(Math.random() * maxHeight);
+            return { x: randomX, y: randomY };
         }
 
-        function updateBird() {
-            birdVelocity += birdGravity;
-            birdY += birdVelocity;
+        function updateScore() {
+            var scoreElement = document.getElementById("score");
+            scoreElement.innerText = "Score: " + score;
         }
 
-        // Pipes
-        let pipes = [];
-        let pipeWidth = 50;
-        let pipeHeight = 200;
-        let pipeGap = 150;
-        let pipeSpeed = 2;
-        let pipeSpawnInterval = 2000;
-        let lastPipeSpawnTime = 0;
-
-        function createPipe() {
-            let pipeX = canvas.width;
-            let pipeY = Math.floor(Math.random() * (canvas.height - pipeHeight));
-            pipes.push({ x: pipeX, y: pipeY });
+        function moveTarget() {
+            var position = getRandomPosition();
+            target.style.left = position.x + "px";
+            target.style.top = position.y + "px";
         }
 
-        function drawPipes() {
-            for (let i = 0; i < pipes.length; i++) {
-                let pipe = pipes[i];
-                context.fillStyle = "green";
-                context.fillRect(pipe.x, 0, pipeWidth, pipe.y);
-                context.fillRect(pipe.x, pipe.y + pipeHeight + pipeGap, pipeWidth, canvas.height - pipe.y - pipeHeight - pipeGap);
-            }
+        function increaseScore() {
+            score++;
+            updateScore();
         }
 
-        function updatePipes() {
-            for (let i = 0; i < pipes.length; i++) {
-                let pipe = pipes[i];
-                pipe.x -= pipeSpeed;
+        target.addEventListener("click", function () {
+            increaseScore();
+            moveTarget();
+        });
 
-                if (pipe.x + pipeWidth < 0) {
-                    pipes.splice(i, 1);
-                    i--;
-                }
-            }
-
-            let currentTime = Date.now();
-            if (currentTime - lastPipeSpawnTime >= pipeSpawnInterval) {
-                createPipe();
-                lastPipeSpawnTime = currentTime;
-            }
-        }
-
-        // Game loop
-        function draw() {
-            context.clearRect(0, 0, canvas.width, canvas.height);
-            drawBird();
-            drawPipes();
-        }
-
-        function update() {
-            updateBird();
-            updatePipes();
-
-            if (birdY + birdRadius > canvas.height || birdY - birdRadius < 0) {
-                // Game over
-                alert("Game over!");
-                resetGame();
-            }
-
-            for (let i = 0; i < pipes.length; i++) {
-                let pipe = pipes[i];
-
-                if (
-                    birdX + birdRadius > pipe.x && birdX - birdRadius < pipe.x + pipeWidth &&
-                    (birdY - birdRadius < pipe.y + pipeHeight || birdY + birdRadius > pipe.y + pipeHeight + pipeGap)
-                ) {
-                    // Game over
-                    alert("Game over!");
-                    resetGame();
-                }
-            }
-        }
-
-        function resetGame() {
-            birdY = canvas.height / 2;
-            birdVelocity = 0;
-            pipes = [];
-        }
-
-        function keyDownHandler(event) {
-            if (event.keyCode === 32) {
-                birdVelocity = -15;
-            }
-        }
-
-        document.addEventListener("keydown", keyDownHandler);
-
-        function gameLoop() {
-            draw();
-            update();
-            requestAnimationFrame(gameLoop);
-        }
-
-        gameLoop();
+        updateScore();
+        moveTarget();
     </script>
 </body>
 </html>
+
