@@ -1,182 +1,170 @@
+<!DOCTYPE html>
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Tic Tac Toe</title>
+    <title>Chess Game</title>
     <style>
-        .board {
-            display: flex;
-            flex-wrap: wrap;
-            width: 300px;
+        /* Chessboard Styles */
+        .chessboard {
+            display: grid;
+            grid-template-columns: repeat(8, 1fr);
+            grid-template-rows: repeat(8, 1fr);
+            width: 400px;
+            height: 400px;
+            border: 1px solid #000;
         }
-        .cell {
-            box-sizing: border-box;
-            width: 100px;
-            height: 100px;
-            border: 1px solid black;
+
+        .chessboard .cell {
             display: flex;
             justify-content: center;
             align-items: center;
-            font-size: 3rem;
-            cursor: pointer;
+            font-size: 24px;
+        }
+
+        .chessboard .cell:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+
+        .selected {
+            background-color: yellow;
         }
     </style>
 </head>
 <body>
-    <h1>Tic Tac Toe</h1>
-    <div class="board"></div>
+    <div class="chessboard">
+        <!-- Chessboard Cells -->
+        <div class="cell" onclick="selectCell(this, 0, 0)">♜</div>
+        <div class="cell" onclick="selectCell(this, 0, 1)">♞</div>
+        <div class="cell" onclick="selectCell(this, 0, 2)">♝</div>
+        <div class="cell" onclick="selectCell(this, 0, 3)">♛</div>
+        <div class="cell" onclick="selectCell(this, 0, 4)">♚</div>
+        <div class="cell" onclick="selectCell(this, 0, 5)">♝</div>
+        <div class="cell" onclick="selectCell(this, 0, 6)">♞</div>
+        <div class="cell" onclick="selectCell(this, 0, 7)">♜</div>
+
+        <!-- Remaining cells omitted for brevity -->
+
+    </div>
 
     <script>
-        const board = document.querySelector('.board');
-        const cells = [];
+        let selectedCell = null;
+        let isWhiteTurn = true;
+        const chessboard = document.querySelector('.chessboard');
 
-        let currentPlayer = 'X';
-        let gameOver = false;
-
-        // Create the cells and add event listeners
-        for (let i = 0; i < 9; i++) {
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-            cells.push(cell);
-            board.appendChild(cell);
-
-            cell.addEventListener('click', () => {
-                if (!gameOver && cell.innerText === '') {
-                    cell.innerText = currentPlayer;
-                    checkWin();
-                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                    makeComputerMove();
+        function selectCell(cell, row, col) {
+            if (selectedCell) {
+                // Move the selected piece to the clicked cell
+                const isValidMove = movePiece(selectedCell, cell);
+                if (isValidMove) {
+                    cell.innerHTML = selectedCell.innerHTML;
+                    selectedCell.innerHTML = '';
+                    selectedCell.classList.remove('selected');
+                    selectedCell = null;
+                    isWhiteTurn = !isWhiteTurn;
+                } else {
+                    alert('Invalid move!');
                 }
-            });
-        }
-
-        // Check for a win or a tie
-        function checkWin() {
-            const winningCombinations = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-                [0, 4, 8], [2, 4, 6] // Diagonals
-            ];
-
-            for (const combination of winningCombinations) {
-                const [a, b, c] = combination;
-                if (
-                    cells[a].innerText !== '' &&
-                    cells[a].innerText === cells[b].innerText &&
-                    cells[a].innerText === cells[c].innerText
-                ) {
-                    gameOver = true;
-                    cells[a].style.backgroundColor = 'green';
-                    cells[b].style.backgroundColor = 'green';
-                    cells[c].style.backgroundColor = 'green';
-                    break;
-                }
-            }
-
-            if (!gameOver && isBoardFull()) {
-                gameOver = true;
-            }
-        }
-
-        // Check if the board is full
-        function isBoardFull() {
-            for (const cell of cells) {
-                if (cell.innerText === '') {
-                    return false;
-                }
-            }
-            return true;
-        }
-
-        // Make the computer's move using the minimax algorithm
-        function makeComputerMove() {
-            if (!gameOver) {
-                const bestMove = getBestMove();
-                if (bestMove !== null) {
-                    cells[bestMove].innerText = currentPlayer;
-                    checkWin();
-                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                }
-            }
-        }
-
-        // Minimax algorithm to find the best move for the computer
-        function minimax(depth, isMaximizingPlayer) {
-            if (checkWin() || isBoardFull()) {
-                return evaluateBoard();
-            }
-
-            if (isMaximizingPlayer) {
-                let maxEval = -Infinity;
-                for (let i = 0; i < cells.length; i++) {
-                    if (cells[i].innerText === '') {
-                        cells[i].innerText = currentPlayer;
-                        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                        const eval = minimax(depth + 1, false);
-                        cells[i].innerText = '';
-                        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                        maxEval = Math.max(maxEval, eval);
-                    }
-                }
-                return maxEval;
             } else {
-                let minEval = Infinity;
-                for (let i = 0; i < cells.length; i++) {
-                    if (cells[i].innerText === '') {
-                        cells[i].innerText = currentPlayer;
-                        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                        const eval = minimax(depth + 1, true);
-                        cells[i].innerText = '';
-                        currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                        minEval = Math.min(minEval, eval);
+                // Select the clicked cell
+                if (cell.innerHTML !== '') {
+                    if ((cell.innerHTML.includes('♜') && isWhiteTurn) || (cell.innerHTML.includes('♚') && !isWhiteTurn)) {
+                        cell.classList.add('selected');
+                        selectedCell = cell;
+                    } else {
+                        alert("It's not your turn!");
                     }
                 }
-                return minEval;
             }
         }
 
-        // Get the best move for the computer using the minimax algorithm
-        function getBestMove() {
-            let bestEval = -Infinity;
-            let bestMove = null;
-            for (let i = 0; i < cells.length; i++) {
-                if (cells[i].innerText === '') {
-                    cells[i].innerText = currentPlayer;
-                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                    const eval = minimax(0, false);
-                    cells[i].innerText = '';
-                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                    if (eval > bestEval) {
-                        bestEval = eval;
-                        bestMove = i;
+        function movePiece(sourceCell, targetCell) {
+            const piece = sourceCell.innerHTML;
+            const sourceRow = parseInt(sourceCell.style.gridRow) - 1;
+            const sourceCol = parseInt(sourceCell.style.gridColumn) - 1;
+            const targetRow = parseInt(targetCell.style.gridRow) - 1;
+            const targetCol = parseInt(targetCell.style.gridColumn) - 1;
+
+            // Check if the move is valid for the selected piece
+            if (isValidMove(piece, sourceRow, sourceCol, targetRow, targetCol)) {
+                // Check if there is a piece at the target cell (capturing)
+                if (targetCell.innerHTML !== '') {
+                    // Checkmate condition
+                    if (targetCell.innerHTML.includes('♚')) {
+                        alert('Checkmate! Game Over.');
+                        chessboard.removeEventListener('click', handleCellClick);
+                        return true;
                     }
                 }
+
+                return true;
             }
-            return bestMove;
+
+            return false;
         }
 
-        // Evaluate the current board state
-        function evaluateBoard() {
-            const winningCombinations = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-                [0, 4, 8], [2, 4, 6] // Diagonals
-            ];
+        function isValidMove(piece, sourceRow, sourceCol, targetRow, targetCol) {
+            const rowDiff = Math.abs(targetRow - sourceRow);
+            const colDiff = Math.abs(targetCol - sourceCol);
 
-            for (const combination of winningCombinations) {
-                const [a, b, c] = combination;
-                const cellA = cells[a].innerText;
-                const cellB = cells[b].innerText;
-                const cellC = cells[c].innerText;
-                if (cellA === cellB && cellB === cellC) {
-                    if (cellA === 'X') {
-                        return 1;
-                    } else if (cellA === 'O') {
-                        return -1;
+            switch (piece) {
+                case '♟': // Pawn
+                    // Pawn can move one step forward or two steps forward from its starting position
+                    // It can capture diagonally forward by one step
+                    if (sourceCol === targetCol) {
+                        // Moving forward
+                        if (sourceRow === 1 && targetRow === 3) {
+                            // Two steps forward from starting position
+                            return true;
+                        } else if (targetRow - sourceRow === 1) {
+                            // One step forward
+                            return true;
+                        }
+                    } else if (colDiff === 1 && targetRow - sourceRow === 1) {
+                        // Capturing diagonally
+                        return true;
                     }
-                }
+                    break;
+
+                case '♜': // Rook
+                    // Rook can move horizontally or vertically any number of steps
+                    if (sourceRow === targetRow || sourceCol === targetCol) {
+                        return true;
+                    }
+                    break;
+
+                case '♝': // Bishop
+                    // Bishop can move diagonally any number of steps
+                    if (rowDiff === colDiff) {
+                        return true;
+                    }
+                    break;
+
+                case '♞': // Knight
+                    // Knight moves in an L-shape pattern
+                    if ((rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2)) {
+                        return true;
+                    }
+                    break;
+
+                case '♛': // Queen
+                    // Queen can move horizontally, vertically, or diagonally any number of steps
+                    if (sourceRow === targetRow || sourceCol === targetCol || rowDiff === colDiff) {
+                        return true;
+                    }
+                    break;
+
+                case '♚': // King
+                    // King can move one step in any direction
+                    if (rowDiff <= 1 && colDiff <= 1) {
+                        return true;
+                    }
+                    break;
+
+                default:
+                    return false;
             }
 
-            return 0;
+            return false;
         }
     </script>
 </body>
