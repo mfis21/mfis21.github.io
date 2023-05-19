@@ -1,98 +1,154 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="utf-8">
-    <title>Tic Tac Toe</title>
-    <style>
-        .board {
-            display: flex;
-            flex-wrap: wrap;
-            width: 300px;
-        }
-        .cell {
-            box-sizing: border-box;
-            width: 100px;
-            height: 100px;
-            border: 1px solid black;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 3rem;
-            cursor: pointer;
-        }
-    </style>
+  <title>Tic-Tac-Toe</title>
+  <style>
+    body {
+      background-color: #f1f1f1;
+    }
+
+    .board {
+      display: flex;
+      flex-wrap: wrap;
+      width: 300px;
+    }
+
+    .board div {
+      width: 100px;
+      height: 100px;
+      border: 1px solid #ccc;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 36px;
+      cursor: pointer;
+    }
+
+    .restart-button {
+      display: none;
+      margin-top: 10px;
+      background-color: #4CAF50;
+      border: none;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    .restart-button:hover {
+      background-color: #45a049;
+    }
+  </style>
 </head>
 <body>
-    <h1>Tic Tac Toe</h1>
-    <div class="board"></div>
+  <h1>Tic-Tac-Toe</h1>
 
-    <script>
-        const board = document.querySelector('.board');
-        const cells = [];
+  <div class="board">
+    <div onclick="makeMove(0, 0)"></div>
+    <div onclick="makeMove(0, 1)"></div>
+    <div onclick="makeMove(0, 2)"></div>
+    <div onclick="makeMove(1, 0)"></div>
+    <div onclick="makeMove(1, 1)"></div>
+    <div onclick="makeMove(1, 2)"></div>
+    <div onclick="makeMove(2, 0)"></div>
+    <div onclick="makeMove(2, 1)"></div>
+    <div onclick="makeMove(2, 2)"></div>
+  </div>
 
-        let currentPlayer = 'X';
-        let gameOver = false;
+  <button class="restart-button" onclick="restartGame()">Restart</button>
 
-        // Create the cells and add event listeners
-        for (let i = 0; i < 9; i++) {
-            const cell = document.createElement('div');
-            cell.classList.add('cell');
-            cells.push(cell);
-            board.appendChild(cell);
+  <script>
+    // Game logic
+    var board = [
+      ['', '', ''],
+      ['', '', ''],
+      ['', '', '']
+    ];
+    var currentPlayer = 'X';
+    var gameOver = false;
 
-            cell.addEventListener('click', () => {
-                if (!gameOver && cell.innerText === '') {
-                    cell.innerText = currentPlayer;
-                    checkWin();
-                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                    makeComputerMove();
-                }
-            });
+    function makeMove(row, col) {
+      if (!gameOver && board[row][col] === '') {
+        board[row][col] = currentPlayer;
+        document.querySelector('.board').children[row * 3 + col].innerText = currentPlayer;
+        document.querySelector('.board').children[row * 3 + col].style.color = currentPlayer === 'X' ? '#ff3333' : '#0088cc';
+
+        if (checkWin(currentPlayer)) {
+          showRestartButton();
+          alert(currentPlayer + ' wins!');
+          gameOver = true;
+        } else if (checkTie()) {
+          showRestartButton();
+          alert('It\'s a tie!');
+          gameOver = true;
+        } else {
+          currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
         }
+      }
+    }
 
-        // Check for a win
-        function checkWin() {
-            const winningCombinations = [
-                [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
-                [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
-                [0, 4, 8], [2, 4, 6] // Diagonals
-            ];
-
-            for (const combination of winningCombinations) {
-                const [a, b, c] = combination;
-                if (
-                    cells[a].innerText !== '' &&
-                    cells[a].innerText === cells[b].innerText &&
-                    cells[a].innerText === cells[c].innerText
-                ) {
-                    gameOver = true;
-                    cells[a].style.backgroundColor = 'green';
-                    cells[b].style.backgroundColor = 'green';
-                    cells[c].style.backgroundColor = 'green';
-                    break;
-                }
-            }
+    function checkWin(player) {
+      // Check rows
+      for (var i = 0; i < 3; i++) {
+        if (board[i][0] === player && board[i][1] === player && board[i][2] === player) {
+          return true;
         }
+      }
 
-        // Make the computer's move
-        function makeComputerMove() {
-            if (!gameOver) {
-                let emptyCells = [];
-                for (const cell of cells) {
-                    if (cell.innerText === '') {
-                        emptyCells.push(cell);
-                    }
-                }
-
-                if (emptyCells.length > 0) {
-                    const randomCell = emptyCells[Math.floor(Math.random() * emptyCells.length)];
-                    randomCell.innerText = currentPlayer;
-                    checkWin();
-                    currentPlayer = currentPlayer === 'X' ? 'O' : 'X';
-                }
-            }
+      // Check columns
+      for (var j = 0; j < 3; j++) {
+        if (board[0][j] === player && board[1][j] === player && board[2][j] === player) {
+          return true;
         }
-    </script>
+      }
+
+      // Check diagonals
+      if (board[0][0] === player && board[1][1] === player && board[2][2] === player) {
+        return true;
+      }
+
+      if (board[0][2] === player && board[1][1] === player && board[2][0] === player) {
+        return true;
+      }
+
+      return false;
+    }
+
+    function checkTie() {
+      for (var i = 0; i < 3; i++) {
+        for (var j = 0; j < 3; j++) {
+          if (board[i][j] === '') {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+
+    function showRestartButton() {
+      document.querySelector('.restart-button').style.display = 'block';
+    }
+
+    function restartGame() {
+      board = [
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', '']
+      ];
+      currentPlayer = 'X';
+      gameOver = false;
+
+      var cells = document.querySelector('.board').children;
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].innerText = '';
+        cells[i].style.color = '';
+      }
+
+      document.querySelector('.restart-button').style.display = 'none';
+    }
+  </script>
 </body>
 </html>
-
