@@ -19,6 +19,11 @@
       font-size: 36px;
       cursor: pointer;
     }
+
+    .restart-button {
+      display: none;
+      margin-top: 10px;
+    }
   </style>
 </head>
 <body>
@@ -36,6 +41,8 @@
     <div onclick="makeMove(2, 2)"></div>
   </div>
 
+  <button class="restart-button" onclick="restartGame()">Restart</button>
+
   <script>
     // Game logic
     var board = [
@@ -52,9 +59,11 @@
         document.querySelector('.board').children[row * 3 + col].innerText = currentPlayer;
 
         if (checkWin(currentPlayer)) {
+          showRestartButton();
           alert(currentPlayer + ' wins!');
           gameOver = true;
         } else if (checkTie()) {
+          showRestartButton();
           alert('It\'s a tie!');
           gameOver = true;
         } else {
@@ -100,7 +109,27 @@
       }
       return true;
     }
-   </script>
+
+    function showRestartButton() {
+      document.querySelector('.restart-button').style.display = 'block';
+    }
+
+    function restartGame() {
+      board = [
+        ['', '', ''],
+        ['', '', ''],
+        ['', '', '']
+      ];
+      currentPlayer = 'X';
+      gameOver = false;
+
+      var cells = document.querySelector('.board').children;
+      for (var i = 0; i < cells.length; i++) {
+        cells[i].innerText = '';
+      }
+
+      document.querySelector('.restart-button').style.display = 'none';
+    }
+  </script>
 </body>
 </html>
-
