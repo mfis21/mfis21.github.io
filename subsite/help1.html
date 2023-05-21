@@ -48,9 +48,94 @@
       <p class="message">Welcome to the fancy subsite!</p>
     </div>
   </div>
+</body>
+</html>
+In this example, the page has a light gray background (#f2f2f2). The "Hello" greeting is displayed with a large font size (48px), a dark gray color (#333), and a subtle text shadow. The greeting is centered on the page with some margin below it. The "Welcome to the fancy subsite!" message is displayed with a slightly smaller font size (24px) and a lighter gray color (#666). A horizontal underline is added below the greeting using a div element with a dark gray background color (#333).
+
+Save the code into an HTML file and open it in a web browser to see the fancy subsite page displaying the "Hello" greeting.
+
+
+
+
+
+User
+add text boxes asking people to explore of more of the page in a fancy way
+ChatGPT
+Sure! Here's an updated version of the fancy subsite page with text boxes asking people to explore more of the page in a fancy way:
+
+html
+Copy code
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Fancy Subsite Page</title>
+  <style>
+    body {
       background-color: #f2f2f2;
       font-family: 'Arial', sans-serif;
     }
+
+    .container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    .content {
+      text-align: center;
+    }
+
+    .greeting {
+      font-size: 48px;
+      color: #333;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+    }
+
+    .underline {
+      width: 120px;
+      height: 3px;
+      background-color: #333;
+      margin: 0 auto;
+      margin-bottom: 30px;
+    }
+
+    .message {
+      font-size: 24px;
+      color: #666;
+      margin-bottom: 30px;
+    }
+
+    .textbox {
+      display: inline-block;
+      background-color: #fff;
+      border: 2px solid #333;
+      padding: 10px 20px;
+      font-size: 18px;
+      color: #333;
+      cursor: pointer;
+      transition: background-color 0.3s ease-in-out;
+    }
+
+    .textbox:hover {
+      background-color: #333;
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="content">
+      <h1 class="greeting">Hello</h1>
+      <div class="underline"></div>
+      <p class="message">Welcome to the fancy subsite!</p>
+      <p class="message">Explore more of the page:</p>
+      <input type="text" class="textbox" value="Click here" onclick="alert('You clicked!')">
+      <input type="text" class="textbox" value="Discover more" onclick="alert('Keep exploring!')">
+    </div>
+  </div>
+</body>
         <body data-new-gr-c-s-check-loaded="14.1110.0" data-gr-ext-installed>
             <a = href="./../index.html">
                 <h1>Home</h1>
